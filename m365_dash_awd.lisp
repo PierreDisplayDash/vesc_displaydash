@@ -53,6 +53,17 @@
 (bufset-u16 tx-frame 2 0x0821)
 (bufset-u16 tx-frame 4 0x6400)
 
+(define tx-frame-dd (array-create 14))    // Not sure why 14
+(bufset-u16 tx-frame-dd 0 0x55AA)
+(bufset-u16 tx-frame-dd 2 0xXXDD) // Replace XX with len
+(bufset-u16 tx-frame-dd 4 0x6400)
+
+55 AA 08 21 |||| 64 00 (01 drive) (0x64 batt) (0 light) (0 beep) (0 speed) (0 fault) (0000 CRC)
+
+55 AA XX DD |||| 64 00 ()
+
+Voltage, current, temp FET, temp motor, speed, distance of current trip, batt %, remain km, 
+
 (define uart-buf (array-create type-byte 64))
 (define current-speed 0)
 (define throttle-in 0)
