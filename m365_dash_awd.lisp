@@ -22,19 +22,19 @@
 ; Speed modes with MAX KM/H and MAX WATTS
 (define eco-speed (/ 7 3.6))
 (define eco-current 0.6)
-(define eco-watts 400)
+(define eco-watts 200)
 (define drive-speed (/ 17 3.6))
 (define drive-current 0.7)
-(define drive-watts 500)
-(define sport-speed (/ 21 3.6)) ; or 400
+(define drive-watts 300)
+(define sport-speed (/ 50 3.6)) ; or 400
 (define sport-current 1.0)
-(define sport-watts 700) ; or 1500000
+(define sport-watts 500) ; or 1500000
 
 (define secret-enabled 1)
-(define secret-eco-speed (/ 27 3.6))
+(define secret-eco-speed (/ 60 3.6))
 (define secret-eco-current 0.8)
-(define secret-eco-watts 1200)
-(define secret-drive-speed (/ 47 3.6))
+(define secret-eco-watts 100)
+(define secret-drive-speed (/ 60 3.6))
 (define secret-drive-current 0.9)
 (define secret-drive-watts 1500)
 (define secret-sport-speed (/ 1000 3.6)) ; 1000 km/h easy
@@ -42,7 +42,7 @@
 (define secret-sport-watts 1500000)
 
 ; Set slave controller
-(define slave-can 15)
+(define slave-can 101)
 
 ; **** Code section ****
 (uart-start 115200 'half-duplex)
@@ -52,6 +52,11 @@
 (bufset-u16 tx-frame 0 0x55AA)
 (bufset-u16 tx-frame 2 0x0821)
 (bufset-u16 tx-frame 4 0x6400)
+
+(define tx-frame-dd (array-create 18))
+(bufset-u16 tx-frame-dd 0 0x55AA)
+(bufset-u16 tx-frame-dd 2 0x0EDD)
+(bufset-u16 tx-frame-dd 4 0x6400)
 
 (define uart-buf (array-create type-byte 64))
 (define current-speed 0)
@@ -208,6 +213,43 @@
     )
 )
 
+(defun update-dd(buffer)
+    (progn
+        ; batt field
+        (bufset-u8 tx-frame-dd 6 (*(get-batt) 100))
+
+        ; vin field
+        (bufset-u16 tx-frame-dd 7 (*(get-vin) 10))
+
+        ; current field
+        (bufset-s16 tx-frame-dd 9 (*(get-current) 10))
+
+        ; speed field
+        (bufset-u8 tx-frame-dd 11 (*(get-speed) 3.6))
+
+        ; temp fet field
+        (bufset-s8 tx-frame-dd 12 (get-temp-fet))
+
+        ; temp mot field
+        (bufset-s8 tx-frame-dd 13 (get-temp-fet))
+
+        ; dist field
+        (bufset-u16 tx-frame-dd 14 (get-dist-abs))
+
+        ; calc crc
+
+        (setvar 'crc 0)
+        (looprange i 2 16
+            (setvar 'crc (+ crc (bufget-u8 tx-frame-dd i))))
+        (setvar 'c-out (bitwise-xor crc 0xFFFF)) 
+        (bufset-u8 tx-frame-dd 16 c-out)
+        (bufset-u8 tx-frame-dd 17 (shr c-out 8))
+
+        ; write
+        (uart-write tx-frame-dd)
+    )
+)
+
 (defun read-frames()
     (loopwhile t
         (progn
@@ -240,6 +282,7 @@
 
         ;(if(= code 0x64)
             (update-dash uart-buf)
+            (update-dd uart-buf)
         ;)
     )
 )
