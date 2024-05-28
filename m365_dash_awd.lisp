@@ -53,16 +53,10 @@
 (bufset-u16 tx-frame 2 0x0821)
 (bufset-u16 tx-frame 4 0x6400)
 
-(define tx-frame-dd (array-create 14))    // Not sure why 14
+(define tx-frame-dd (array-create 18))
 (bufset-u16 tx-frame-dd 0 0x55AA)
-(bufset-u16 tx-frame-dd 2 0xXXDD) // Replace XX with len
+(bufset-u16 tx-frame-dd 2 0x0EDD)
 (bufset-u16 tx-frame-dd 4 0x6400)
-
-55 AA 08 21 |||| 64 00 (01 drive) (0x64 batt) (0 light) (0 beep) (0 speed) (0 fault) (0000 CRC)
-
-55 AA XX DD |||| 64 00 ()
-
-Voltage, current, temp FET, temp motor, speed, distance of current trip, batt %, remain km, 
 
 (define uart-buf (array-create type-byte 64))
 (define current-speed 0)
@@ -219,6 +213,44 @@ Voltage, current, temp FET, temp motor, speed, distance of current trip, batt %,
     )
 )
 
+(defun update-dd(buffer) ; Frame 0x64
+    (progn
+        ; batt field
+        (bufset-u8 tx-frame-dd 6 (*(get-batt) 100))
+        
+        ; vin field
+        (bufset-u16 tx-frame-dd 7 (*(get-vin) 10))
+
+        ; current field
+        (bufset-s16 tx-frame-dd 9 (*(get-current) 10))
+
+        ; speed field
+        (bufset-u8 tx-frame-dd 11 (*(get-speed) 3.6))
+
+        ; temp fet field
+        (bufset-s8 tx-frame-dd 12 (get-temp-fet)
+
+        ; temp mot field
+        (bufset-s8 tx-frame-dd 13 (get-temp-fet)
+                   
+        ; dist field
+        (bufset-u16 tx-frame-dd 14 (get-dist-abs)
+                   
+        ; calc crc
+
+        (setvar 'crc 0)
+        (looprange i 2 16
+            (setvar 'crc (+ crc (bufget-u8 tx-frame i))))
+        (setvar 'c-out (bitwise-xor crc 0xFFFF)) 
+        (bufset-u8 tx-frame 16 c-out)
+        (bufset-u8 tx-frame 17 (shr c-out 8))
+
+        ; write
+        (uart-write tx-frame)
+    )
+)
+
+
 (defun read-frames()
     (loopwhile t
         (progn
@@ -251,6 +283,7 @@ Voltage, current, temp FET, temp motor, speed, distance of current trip, batt %,
 
         ;(if(= code 0x64)
             (update-dash uart-buf)
+            (update-dd uart-buf)
         ;)
     )
 )
