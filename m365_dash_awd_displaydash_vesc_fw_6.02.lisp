@@ -48,15 +48,10 @@
 (uart-start 115200 'half-duplex)
 (gpio-configure 'pin-rx 'pin-mode-in-pu)
 
-(define tx-frame (array-create 14))
+(define tx-frame (array-create 15))
 (bufset-u16 tx-frame 0 0x55AA)
 (bufset-u16 tx-frame 2 0x0821)
 (bufset-u16 tx-frame 4 0x6400)
-
-(define tx-frame-dd (array-create 18))
-(bufset-u16 tx-frame-dd 0 0x55AA)
-(bufset-u16 tx-frame-dd 2 0x0EDD)
-(bufset-u16 tx-frame-dd 4 0x6400)
 
 (define uart-buf (array-create type-byte 64))
 (define current-speed 0)
@@ -199,54 +194,20 @@
         ; error field
         (bufset-u8 tx-frame 11 (get-fault))
 
+        ; test field
+        (bufset-u8 tx-frame 12 (get-fault))
+
         ; calc crc
 
         (setvar 'crc 0)
-        (looprange i 2 12
+        (looprange i 2 13
             (setvar 'crc (+ crc (bufget-u8 tx-frame i))))
         (setvar 'c-out (bitwise-xor crc 0xFFFF)) 
-        (bufset-u8 tx-frame 12 c-out)
-        (bufset-u8 tx-frame 13 (shr c-out 8))
+        (bufset-u8 tx-frame 13 c-out)
+        (bufset-u8 tx-frame 14 (shr c-out 8))
 
         ; write
         (uart-write tx-frame)
-    )
-)
-
-(defun update-dd(buffer)
-    (progn
-        ; batt field
-        (bufset-u8 tx-frame-dd 6 (*(get-batt) 100))
-
-        ; vin field
-        (bufset-u16 tx-frame-dd 7 (*(get-vin) 10))
-
-        ; current field
-        (bufset-u16 tx-frame-dd 9 (*(get-current) 10))
-
-        ; speed field
-        (bufset-u8 tx-frame-dd 11 (*(get-speed) 3.6))
-
-        ; temp fet field
-        (bufset-u8 tx-frame-dd 12 (get-temp-fet))
-
-        ; temp mot field
-        (bufset-u8 tx-frame-dd 13 (get-temp-fet))
-
-        ; dist field
-        (bufset-u16 tx-frame-dd 14 (get-dist-abs))
-
-        ; calc crc
-
-        (setvar 'crc 0)
-        (looprange i 2 16
-            (setvar 'crc (+ crc (bufget-u8 tx-frame-dd i))))
-        (setvar 'c-out (bitwise-xor crc 0xFFFF)) 
-        (bufset-u8 tx-frame-dd 16 c-out)
-        (bufset-u8 tx-frame-dd 17 (shr c-out 8))
-
-        ; write
-        (uart-write tx-frame-dd)
     )
 )
 
@@ -280,10 +241,7 @@
             (adc-input uart-buf)
         )
 
-        (if(= code 0xDD)
-            (update-dd uart-buf)
-            (update-dash uart-buf)
-        )
+        (update-dash uart-buf)
     )
 )
 
