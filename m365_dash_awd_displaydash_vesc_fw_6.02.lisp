@@ -1,4 +1,4 @@
-; test 4
+; test 5
 ; M365 dashboard compability lisp script v0.6 by Netzpfuscher and 1zuna
 ; UART Wiring: red=5V black=GND yellow=COM-TX (UART-HDX) green=COM-RX (button)+3.3V with 1K Resistor
 ; Guide (German): https://rollerplausch.com/threads/vesc-controller-einbau-1s-pro2-g30.6032/
@@ -162,8 +162,8 @@
         )
         
         ; batt field
-        ; (bufset-u8 tx-frame 7 (*(get-batt) 100))
-        (bufset-u8 tx-frame 7 200))
+        (bufset-u8 tx-frame 7 (*(get-batt) 100))
+        ;(bufset-u8 tx-frame 7 200))
         
         ; light field
         (if (= off 0)
@@ -194,8 +194,8 @@
         )
         
         ; error field
-        (bufset-u8 tx-frame 11 (get-fault))
-
+        ;(bufset-u8 tx-frame 11 (get-fault))
+        (bufset-u8 tx-frame 11 0xdd)
 
         ; calc crc
 
