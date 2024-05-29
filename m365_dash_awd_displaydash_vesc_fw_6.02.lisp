@@ -222,16 +222,16 @@
         (bufset-u16 tx-frame-dd 7 (*(get-vin) 10))
 
         ; current field
-        (bufset-s16 tx-frame-dd 9 (*(get-current) 10))
+        (bufset-u16 tx-frame-dd 9 (*(get-current) 10))
 
         ; speed field
         (bufset-u8 tx-frame-dd 11 (*(get-speed) 3.6))
 
         ; temp fet field
-        (bufset-s8 tx-frame-dd 12 (get-temp-fet))
+        (bufset-u8 tx-frame-dd 12 (get-temp-fet))
 
         ; temp mot field
-        (bufset-s8 tx-frame-dd 13 (get-temp-fet))
+        (bufset-u8 tx-frame-dd 13 (get-temp-fet))
 
         ; dist field
         (bufset-u16 tx-frame-dd 14 (get-dist-abs))
@@ -280,10 +280,10 @@
             (adc-input uart-buf)
         )
 
-        ;(if(= code 0x64)
+        (if(= code 0x64)
             (update-dash uart-buf)
-            (update-dd uart-buf)
-        ;)
+            ;(update-dd uart-buf)
+        )
     )
 )
 
