@@ -1,4 +1,4 @@
-; test 6
+; test 8
 ; M365 dashboard compability lisp script v0.6 by Netzpfuscher and 1zuna
 ; UART Wiring: red=5V black=GND yellow=COM-TX (UART-HDX) green=COM-RX (button)+3.3V with 1K Resistor
 ; Guide (German): https://rollerplausch.com/threads/vesc-controller-einbau-1s-pro2-g30.6032/
@@ -49,7 +49,7 @@
 (uart-start 115200 'half-duplex)
 (gpio-configure 'pin-rx 'pin-mode-in-pu)
 
-(define tx-frame (array-create 22))
+(define tx-frame (array-create 23))
 (bufset-u16 tx-frame 0 0x55AA)
 (bufset-u16 tx-frame 2 0x0821)
 (bufset-u16 tx-frame 4 0x6400)
@@ -80,6 +80,9 @@
 ; Sound feedback
 
 (define feedback 0)
+
+(define count 0)
+
 
 (defun adc-input(buffer) ; Frame 0x65
     (progn
@@ -163,7 +166,6 @@
         
         ; batt field
         (bufset-u8 tx-frame 7 (*(get-batt) 100))
-        ;(bufset-u8 tx-frame 7 200))
         
         ; light field
         (if (= off 0)
@@ -194,8 +196,12 @@
         )
         
         ; error field
-        ;(bufset-u8 tx-frame 11 (get-fault))
-        (bufset-u8 tx-frame 11 88)
+        (if (< count 100)
+            (progn
+                (bufset-u8 tx-frame 11 88)
+                (setvar 'count (+ count 1)))
+            (bufset-u8 tx-frame 11 (get-fault))
+        )
 
         ; calc crc
 
@@ -226,6 +232,9 @@
 
         ; dist field
         (bufset-u16 tx-frame 20 (get-dist-abs))
+        
+        ; batt field
+        (bufset-u8 tx-frame 22 (*(get-batt) 100))
         
         ; write
         (uart-write tx-frame)
