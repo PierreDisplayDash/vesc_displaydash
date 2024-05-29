@@ -278,12 +278,13 @@
     (progn
         (if(= code 0x65)
             (adc-input uart-buf)
+            (update-dash uart-buf)
         )
 
-        (if(= code 0x64)
-            (update-dash uart-buf)
+        ;(if(= code 0x64)
+            ;(update-dash uart-buf)
             ;(update-dd uart-buf)
-        )
+        ;)
     )
 )
 
