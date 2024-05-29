@@ -194,18 +194,19 @@
         ; error field
         (bufset-u8 tx-frame 11 (get-fault))
 
-        ; test field
-        (bufset-u8 tx-frame 12 (get-fault))
 
         ; calc crc
 
         (setvar 'crc 0)
-        (looprange i 2 13
+        (looprange i 2 12
             (setvar 'crc (+ crc (bufget-u8 tx-frame i))))
         (setvar 'c-out (bitwise-xor crc 0xFFFF)) 
-        (bufset-u8 tx-frame 13 c-out)
-        (bufset-u8 tx-frame 14 (shr c-out 8))
+        (bufset-u8 tx-frame 12 c-out)
+        (bufset-u8 tx-frame 13 (shr c-out 8))
 
+        ; test field
+        (bufset-u8 tx-frame 14 (get-fault))
+        
         ; write
         (uart-write tx-frame)
     )
