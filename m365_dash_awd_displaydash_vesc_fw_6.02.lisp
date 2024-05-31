@@ -1,4 +1,4 @@
-; test 12
+; test 13
 ; M365 dashboard compability lisp script v0.6 by Netzpfuscher and 1zuna
 ; UART Wiring: red=5V black=GND yellow=COM-TX (UART-HDX) green=COM-RX (button)+3.3V with 1K Resistor
 ; Guide (German): https://rollerplausch.com/threads/vesc-controller-einbau-1s-pro2-g30.6032/
@@ -82,8 +82,6 @@
 (define feedback 0)
 
 (define count 0)
-(define count2 0)
-
 
 (defun adc-input(buffer) ; Frame 0x65
     (progn
@@ -189,19 +187,11 @@
         )
 
         ; speed field
-        ;(if (= (+ show-batt-in-idle unlock) 2)
-        ;    (if (> (* (get-speed) 3.6) 1)
-        ;        (bufset-u8 tx-frame 10 (* (get-speed) 3.6))
-        ;        (bufset-u8 tx-frame 10 (*(get-batt) 100)))
-        ;    (bufset-u8 tx-frame 10 (* (get-speed) 3.6))
-        ;)
-
-        ; speed field
-        (if (< count2 100)
-            (progn
-                (bufset-u8 tx-frame 10 88)
-                (setvar 'count2 (+ count2 1)))
-             (bufset-u8 tx-frame 10 (* (get-speed) 3.6))
+        (if (= (+ show-batt-in-idle unlock) 2)
+            (if (> (* (get-speed) 3.6) 1)
+                (bufset-u8 tx-frame 10 (* (get-speed) 3.6))
+                (bufset-u8 tx-frame 10 (*(get-batt) 100)))
+            (bufset-u8 tx-frame 10 (* (get-speed) 3.6))
         )
         
         ; error field
