@@ -1,4 +1,4 @@
-; test 14
+; test 15
 ; M365 dashboard compability lisp script v0.6 by Netzpfuscher and 1zuna
 ; UART Wiring: red=5V black=GND yellow=COM-TX (UART-HDX) green=COM-RX (button)+3.3V with 1K Resistor
 ; Guide (German): https://rollerplausch.com/threads/vesc-controller-einbau-1s-pro2-g30.6032/
@@ -203,7 +203,6 @@
         )
 
         ; calc crc
-
         (setvar 'crc 0)
         (looprange i 2 12
             (setvar 'crc (+ crc (bufget-u8 tx-frame i))))
@@ -211,29 +210,29 @@
         (bufset-u8 tx-frame 12 c-out)
         (bufset-u8 tx-frame 13 (shr c-out 8))
 
+        ; batt field
+        (bufset-u8 tx-frame 14 (*(get-batt) 100))
+        
         ; vin field
-        (bufset-u16 tx-frame 14 (*(get-vin) 10))
+        (bufset-u16 tx-frame 15 (*(get-vin) 10))
 
         ; current field
-        (bufset-u16 tx-frame 16 (*(get-current) 10))
+        (bufset-u16 tx-frame 17 (*(get-current) 10))
 
         ; current dir field
         (if (> (get-current)  0)
-            (bufset-u8 tx-frame 17 1)
-            (bufset-u8 tx-frame 17 0)
+            (bufset-u8 tx-frame 19 0)
+            (bufset-u8 tx-frame 19 1)
         )
-
-        ; temp fet field
-        (bufset-u8 tx-frame 18 (get-temp-fet))
-
-        ; temp mot field
-        (bufset-u8 tx-frame 19 (get-temp-fet))
 
         ; dist field
         (bufset-u16 tx-frame 20 (get-dist-abs))
         
-        ; batt field
-        (bufset-u8 tx-frame 22 (*(get-batt) 100))
+        ; temp fet field
+        (bufset-u8 tx-frame 22 (get-temp-fet))
+
+        ; temp mot field
+        (bufset-u8 tx-frame 23 (get-temp-fet))
         
         ; write
         (uart-write tx-frame)
