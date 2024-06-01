@@ -49,7 +49,7 @@
 (uart-start 115200 'half-duplex)
 (gpio-configure 'pin-rx 'pin-mode-in-pu)
 
-(define tx-frame (array-create 23))
+(define tx-frame (array-create 24))
 (bufset-u16 tx-frame 0 0x55AA)
 (bufset-u16 tx-frame 2 0x0821)
 (bufset-u16 tx-frame 4 0x6400)
