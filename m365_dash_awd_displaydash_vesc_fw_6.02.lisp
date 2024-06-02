@@ -1,4 +1,4 @@
-; test 18
+; test 19
 ; M365 dashboard compability lisp script v0.6 by Netzpfuscher and 1zuna
 ; UART Wiring: red=5V black=GND yellow=COM-TX (UART-HDX) green=COM-RX (button)+3.3V with 1K Resistor
 ; Guide (German): https://rollerplausch.com/threads/vesc-controller-einbau-1s-pro2-g30.6032/
@@ -49,7 +49,7 @@
 (uart-start 115200 'half-duplex)
 (gpio-configure 'pin-rx 'pin-mode-in-pu)
 
-(define tx-frame (array-create 23))
+(define tx-frame (array-create 24))
 (bufset-u16 tx-frame 0 0x55AA)
 (bufset-u16 tx-frame 2 0x0821)
 (bufset-u16 tx-frame 4 0x6400)
