@@ -212,9 +212,11 @@
         (bufset-u8 tx-frame 13 (shr c-out 8))
 
         ; vin field
+        (print (str-from-n (get-vin) "Voltage: %.2f"))
         (bufset-u16 tx-frame 14 (*(get-vin) 10))
 
         ; current field
+        (print (str-from-n (get-current) "Current: %.2f"))
         (bufset-u16 tx-frame 16 (*(get-current) 10))
 
         ; current dir field
@@ -230,6 +232,7 @@
         (bufset-u8 tx-frame 20 (get-temp-fet))
 
         ; dist field
+        (print (str-from-n (get-dist-abs) "dist-abs: %.2f"))
         (bufset-u16 tx-frame 21 (get-dist-abs))
 
         ; batt field
