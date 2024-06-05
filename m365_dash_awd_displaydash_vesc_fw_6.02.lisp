@@ -229,7 +229,7 @@
         (bufset-u8 tx-frame 19 (get-temp-fet))
 
         ; temp mot field
-        (bufset-u8 tx-frame 20 (get-temp-fet))
+        (bufset-u8 tx-frame 20 (get-temp-mot))
 
         ; dist field
         (print (str-from-n (get-dist-abs) "dist-abs: %.2f"))
