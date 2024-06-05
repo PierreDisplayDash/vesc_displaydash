@@ -1,4 +1,4 @@
-; test 25
+; test 26
 ; M365 dashboard compability lisp script v0.6 by Netzpfuscher and 1zuna
 ; UART Wiring: red=5V black=GND yellow=COM-TX (UART-HDX) green=COM-RX (button)+3.3V with 1K Resistor
 ; Guide (German): https://rollerplausch.com/threads/vesc-controller-einbau-1s-pro2-g30.6032/
@@ -214,9 +214,11 @@
         ; vin field
         (print (str-from-n (get-vin) "Voltage: %.2f"))
         (bufset-u16 tx-frame 14 (*(get-vin) 10))
+        (print (str-from-n (bufget-u8 tx-frame 14) "TX 14: %d"))
+        (print (str-from-n (bufget-u8 tx-frame 15) "TX 15: %d"))
 
         ; current field
-        (print (str-from-n (get-current) "Current: %.2f"))
+        ; (print (str-from-n (get-current) "Current: %.2f"))
         (bufset-u16 tx-frame 16 (*(get-current) 10))
 
         ; current dir field
@@ -232,7 +234,7 @@
         (bufset-u8 tx-frame 20 (get-temp-mot))
 
         ; dist field
-        (print (str-from-n (get-dist-abs) "dist-abs: %.2f"))
+        ; (print (str-from-n (get-dist-abs) "dist-abs: %.2f"))
         (bufset-u16 tx-frame 21 (get-dist-abs))
 
         ; batt field
