@@ -1,4 +1,4 @@
-; test 28
+; test 29
 ; M365 dashboard compability lisp script v0.6 by Netzpfuscher and 1zuna
 ; UART Wiring: red=5V black=GND yellow=COM-TX (UART-HDX) green=COM-RX (button)+3.3V with 1K Resistor
 ; Guide (German): https://rollerplausch.com/threads/vesc-controller-einbau-1s-pro2-g30.6032/
@@ -49,7 +49,7 @@
 (uart-start 115200 'half-duplex)
 (gpio-configure 'pin-rx 'pin-mode-in-pu)
 
-(define tx-frame (array-create 25))
+(define tx-frame (array-create 24))
 (bufset-u16 tx-frame 0 0x55AA)
 (bufset-u16 tx-frame 2 0x0821)
 (bufset-u16 tx-frame 4 0x6400)
@@ -212,36 +212,30 @@
         (bufset-u8 tx-frame 13 (shr c-out 8))
 
         ; vin field
-        (print (str-from-n (get-vin) "Voltage: %.2f"))
+        ;(print (str-from-n (get-vin) "Voltage: %.2f"))
         (bufset-u16 tx-frame 14 (*(get-vin) 10))
-        (print (str-from-n (bufget-u8 tx-frame 14) "TX 14: %d"))
-        (print (str-from-n (bufget-u8 tx-frame 15) "TX 15: %d"))
+        ;(print (str-from-n (bufget-u8 tx-frame 14) "TX 14: %d"))
+        ;(print (str-from-n (bufget-u8 tx-frame 15) "TX 15: %d"))
 
         ; current field
         ; (print (str-from-n (get-current) "Current: %.2f"))
-        (bufset-u16 tx-frame 16 (*(get-current) 10))
-
-        ; current dir field
-        (if (> (get-current)  0)
-            (bufset-u8 tx-frame 18 1)
-            (bufset-u8 tx-frame 18 0)
-        )
+        (bufset-u16 tx-frame 16 (+(*(get-current) 10) 32768 ))
 
         ; temp fet field
-        (bufset-u8 tx-frame 19 (get-temp-fet))
+        (bufset-u8 tx-frame 18 (get-temp-fet))
 
         ; temp mot field
-        (bufset-u8 tx-frame 20 (get-temp-mot))
+        (bufset-u8 tx-frame 19 (get-temp-mot))
 
         ; dist field
         ; (print (str-from-n (get-dist-abs) "dist-abs: %.2f"))
-        (bufset-u16 tx-frame 21 (get-dist-abs))
+        (bufset-u16 tx-frame 20 (get-dist-abs))
 
         ; batt field
-        (bufset-u8 tx-frame 23 (*(get-batt) 100))
+        (bufset-u8 tx-frame 22 (*(get-batt) 100))
 
         ; batt field
-        (bufset-u8 tx-frame 24 off)
+        (bufset-u8 tx-frame 23 off)
         
         ; write
         (uart-write tx-frame)
